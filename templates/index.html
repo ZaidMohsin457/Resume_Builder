@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Resume Matcher</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="navbar-content">
+      <div class="logo">Logo</div>
+      <div class="navbar-right">
+        <button class="primary-button">Login</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="hero-section">
+    <div class="hero-content">
+      <div class="text-section">
+        <h1 class="hero-title">AI-powered Resume-to-Job Matcher</h1>
+        <p class="hero-description">
+          Transform your job search with AI-powered resume optimization and smart job matching.
+        </p>
+        <input type="file" id="resumeUpload" hidden accept=".pdf" />
+        <button class="upload-button" onclick="document.getElementById('resumeUpload').click()">Upload Your Resume</button>
+      </div>
+      <div class="image-section">
+        <img src="/static/image (2).png" alt="Resume Matching Illustration" />
+      </div>
+    </div>
+  </main>
+  <script src="/static/script.js"></script>
+</body>
+</html>

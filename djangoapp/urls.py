@@ -1,0 +1,10 @@
+from django.urls import path
+from djangoapp import views
+
+urlpatterns = [
+    path('',views.index,name='index'),
+    path('options/',views.options,name='options'),
+    path('options/jobs/',views.jobs,name='jobs'),
+    path('options/user_job_description/resume_builder/',views.resume_builder,name='resume_builder'),
+    path('options/user_job_description/',views.user_job_description,name='user_job_description'),
+]

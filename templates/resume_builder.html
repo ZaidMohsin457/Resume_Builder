@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analysis Results</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="navbar-content">
+      <div class="logo">Logo</div>
+      <div class="navbar-right">
+        <button class="primary-button">Login</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="analysis-container">
+    <div class="resume-sidebar">
+      <div class="resume-info">
+        <h3>Your Resume</h3>
+        <p id="analysisResumeName"></p>
+        <button class="secondary-button">Download Original</button>
+        <button class="secondary-button">Upload New</button>
+      </div>
+    </div>
+
+    <div class="recommendations-section">
+      <h2>Recommended Improvements</h2>
+      <div class="recommendations-list">
+        <div class="recommendation-card accepted">
+          <div class="recommendation-header">
+            <h3>Add Missing Skill</h3>
+            <div class="status-indicator"></div>
+          </div>
+          <p class="recommendation-text">Add 'Project Management' to Skills section</p>
+          <div class="recommendation-actions">
+            <button class="accept-button">Accepted</button>
+            <button class="reject-button">Reject</button>
+          </div>
+        </div>
+      </div>
+      <div class="final-actions">
+        <button class="download-button">Download Enhanced Resume</button>
+        <button class="save-button">Save Changes</button>
+      </div>
+    </div>
+  </div>
+  <script src="/static/script.js"></script>
+</body>
+</html>
