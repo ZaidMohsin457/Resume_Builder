@@ -84,7 +84,7 @@ def extract_text_from_pdf(file_path):
     return text
 
 def get_recommendations(resume_text, job_text):
-    openai.api_key = ""  # Replace with your actual API key
+    openai.api_key = "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"  # Replace with your actual API key
     
     prompt = f"""
     You are an expert career advisor and resume consultant. Please analyze the following resume against the job description and provide specific, actionable recommendations.
