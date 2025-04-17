@@ -59,6 +59,95 @@ body {
     width: fit-content;
   }
   
+  /* Job Description Page */
+  .job-description-container {
+    width: 100%;
+    min-height: calc(100vh - 72px);
+    padding: 112px 64px;
+    background: linear-gradient(180deg, black 5%, #3A3A3A 73%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    top: 72px;
+    box-sizing: border-box;
+  }
+  
+  .job-description-container h1 {
+    text-align: center;
+    margin-bottom: 24px;
+    color: #F5F5F5;
+    font-size: 36px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  
+  .job-description-container form {
+    max-width: 800px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 40px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-sizing: border-box;
+  }
+  
+  .job-description-container textarea {
+    width: 100%;
+    min-height: 300px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: #F5F5F5;
+    font-size: 16px;
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.6;
+    resize: vertical;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    margin: 0;
+  }
+  
+  .job-description-container textarea:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+  }
+  
+  .job-description-container textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+    font-family: 'DM Sans', sans-serif;
+  }
+  
+  .job-description-container .primary-button {
+    align-self: center;
+    padding: 8px 20px;
+    font-size: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    margin-top: 16px;
+    background: white;
+    color: black;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: fit-content;
+  }
+  
+  .job-description-container .primary-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
   /* Hero Section */
   .hero-section {
     width: 100%;
@@ -207,15 +296,4 @@ body {
     background: linear-gradient(180deg, black 5%, #3A3A3A 73%);
     min-height: 100vh;
     color: #F5F5F5;
-  }
-  
-  .job-description-input {
-    width: 100%;
-    height: 300px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid #555;
-    border-radius: 8px;
-    padding: 16px;
-    color: white;
-    margin: 24px 0;
   }

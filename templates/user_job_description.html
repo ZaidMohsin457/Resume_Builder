@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Custom Job Analysis</title>
+  <title>Enter Job Description</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
@@ -16,13 +16,24 @@
     </div>
   </header>
 
-  <main class="custom-job-section">
-    <div class="custom-job-content">
-      <h2>Enter Job Description</h2>
-      <textarea class="job-description-input" placeholder="Paste job description here..."></textarea>
-      <button class="upload-button" onclick="window.location.href='resume_builder'">Analyze Resume</button>
-    </div>
+  <main class="job-description-container">
+    <h1>Enter Job Description</h1>
+    <form method="POST" action="{% url 'user_job_description' %}">
+      {% csrf_token %}
+      <input type="hidden" name="analysis_id" id="analysis_id">
+      <textarea name="job_description" placeholder="Paste the job description here..." required></textarea>
+      <button type="submit" class="primary-button">Analyze Resume</button>
+    </form>
   </main>
-  <script src="/static/script.js"></script>
+
+  <script>
+    // Get the analysis_id from localStorage and set it in the form
+    document.addEventListener('DOMContentLoaded', function() {
+      const analysisId = localStorage.getItem('currentAnalysisId');
+      if (analysisId) {
+        document.getElementById('analysis_id').value = analysisId;
+      }
+    });
+  </script>
 </body>
 </html>
