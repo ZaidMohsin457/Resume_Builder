@@ -20,31 +20,45 @@
     <div class="resume-sidebar">
       <div class="resume-info">
         <h3>Your Resume</h3>
-        <p id="analysisResumeName"></p>
-        <button class="secondary-button">Download Original</button>
-        <button class="secondary-button">Upload New</button>
+        <p>{{ analysis.resume_file.name }}</p>
+        <button class="secondary-button" onclick="downloadOriginal()">Download Original</button>
+        <button class="secondary-button" onclick="uploadNew()">Upload New</button>
       </div>
     </div>
 
     <div class="recommendations-section">
       <h2>Recommended Improvements</h2>
-      <div class="recommendations-list">
-        <div class="recommendation-card accepted">
-          <div class="recommendation-header">
-            <h3>Add Missing Skill</h3>
-            <div class="status-indicator"></div>
-          </div>
-          <p class="recommendation-text">Add 'Project Management' to Skills section</p>
-          <div class="recommendation-actions">
-            <button class="accept-button">Accepted</button>
-            <button class="reject-button">Reject</button>
-          </div>
+      <form id="recommendationsForm" method="POST" action="">
+        {% csrf_token %}
+        <div class="recommendations-list">
+          {% if recommendations %}
+            {% for rec in recommendations %}
+              <div class="recommendation-card" id="rec-{{ forloop.counter0 }}">
+                <div class="recommendation-header">
+                  <h3>{{ rec.section|title }}</h3>
+                  <div class="status-indicator"></div>
+                </div>
+                <p class="recommendation-text">
+                  Current Content: {{ rec.current_content }} <br>
+                  Direct Implementation: {{ rec.direct_implementation }} <br>
+                  Reason Impact: {{ rec.reason_impact }}
+                </p>
+                <div class="recommendation-actions">
+                  <input type="hidden" name="recommendations[]" value="{{ forloop.counter0 }}">
+                  <button type="button" class="accept-button" onclick="toggleRecommendation(this, {{ forloop.counter0 }})">Accept</button>
+                  <button type="button" class="reject-button" onclick="toggleRecommendation(this, {{ forloop.counter0 }})">Reject</button>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="no-recommendations">No recommendations available yet.</p>
+          {% endif %}
         </div>
-      </div>
-      <div class="final-actions">
-        <button class="download-button">Download Enhanced Resume</button>
-        <button class="save-button">Save Changes</button>
-      </div>
+        <div class="final-actions">
+          <button type="button" class="download-button" onclick="downloadImprovedResume()">Download Improved Resume</button>
+          <button type="submit" class="save-button">Save Changes</button>
+        </div>
+      </form>
     </div>
   </div>
   <script src="/static/script.js"></script>

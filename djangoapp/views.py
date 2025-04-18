@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import os
 from django.conf import settings
@@ -8,6 +8,7 @@ import PyPDF2
 import openai
 import json
 
+global analysis_id
 @csrf_exempt
 def index(request):
     if request.method == 'POST' and request.FILES.get('file'):
@@ -19,6 +20,8 @@ def index(request):
             os.makedirs(upload_dir)
         
         # Save the file and create ResumeAnalysis object
+        # Get only the filename without the path
+        filename = file.name
         analysis = ResumeAnalysis(resume_file=file)
         analysis.save()
         
@@ -33,7 +36,8 @@ def index(request):
 def user_job_description(request):
     if request.method == 'POST':
         job_description = request.POST.get('job_description')
-        analysis_id = request.POST.get('analysis_id')
+        # analysis_id = request.POST.get('analysis_id')
+        analysis_id = 1
         
         try:
             analysis = ResumeAnalysis.objects.get(id=analysis_id)
@@ -125,3 +129,4 @@ def get_recommendations(resume_text, job_text):
         return recommendations
     except json.JSONDecodeError:
         return []
+
