@@ -1,0 +1,416 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Main Content -->
+        <div class="px-4 py-6 sm:px-0">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left Sidebar -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">Your Resume</h2>
+                        <div class="space-y-4">
+                            {% if resume %}
+                            <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg" data-resume-id="{{ resume.id }}">
+                                <div class="flex items-center">
+                                    <i data-feather="file-text" class="h-6 w-6 text-blue-600"></i>
+                                    <span class="ml-2 text-sm font-medium text-gray-900">{{ resume.file.name|slice:"8:" }}</span>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <a href="{{ resume.file.url }}" target="_blank" class="text-blue-600 hover:text-blue-800" title="View Resume">
+                                        <i data-feather="eye" class="h-5 w-5"></i>
+                                    </a>
+                                    <a href="{{ resume.file.url }}" download class="text-blue-600 hover:text-blue-800" title="Download Resume">
+                                        <i data-feather="download" class="h-5 w-5"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                <p>Uploaded on: {{ resume.uploaded_at|date:"F j, Y" }}</p>
+                                {% if resume.skills %}
+                                <p class="mt-2">Skills found: {{ resume.skills|length }}</p>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <i data-feather="file-text" class="mx-auto h-12 w-12 text-gray-400"></i>
+                                <p class="mt-2 text-sm text-gray-600">No resume uploaded yet</p>
+                            </div>
+                            {% endif %}
+                            
+                            <form id="resumeForm" method="post" enctype="multipart/form-data" class="space-y-4">
+                                {% csrf_token %}
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                    <input type="file" id="resume" name="resume" accept=".pdf,.docx" class="hidden" required>
+                                    <label for="resume" class="cursor-pointer">
+                                        <i data-feather="upload" class="mx-auto h-12 w-12 text-gray-400"></i>
+                                        <p class="mt-1 text-sm text-gray-600" id="fileName">
+                                            Click to upload or drag and drop
+                                        </p>
+                                        <p class="mt-1 text-xs text-gray-500">
+                                            PDF or DOCX up to 10MB
+                                        </p>
+                                    </label>
+                                </div>
+                                <button type="submit" id="uploadButton" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                    <span class="flex items-center justify-center">
+                                        <span id="buttonText">Upload Resume</span>
+                                        <div id="uploadSpinner" class="hidden ml-2">
+                                            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                        </div>
+                                    </span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <!-- Header and Buttons -->
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-lg font-medium text-gray-900">Job Recommendations</h2>
+                            <div class="flex space-x-3">
+                                <button id="improveResumeBtn" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                                    <i data-feather="edit" class="inline-block mr-2"></i>
+                                    Improve Resume
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Loading Spinner -->
+                        <div id="loadingSpinner" class="hidden">
+                            <div class="flex items-center justify-center py-12">
+                                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                                <p class="ml-3 text-gray-600">Processing your request...</p>
+                            </div>
+                        </div>
+
+                        <!-- Extracted Info -->
+                        <div id="extractedInfo" class="hidden mb-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Extracted Information</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-700 mb-2">Skills</h4>
+                                    <div id="skillsList" class="flex flex-wrap gap-2"></div>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-700 mb-2">Job Titles</h4>
+                                    <div id="jobTitlesList" class="flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Job Results -->
+                        <div id="jobResults" class="space-y-4">
+                            {% for job in jobs %}
+                            <div class="card-glow bg-white border border-gray-200 rounded-lg p-6">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="text-lg font-medium text-gray-900">{{ job.title }}</h3>
+                                        <p class="text-sm text-gray-500">{{ job.company }}</p>
+                                    </div>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        {{ job.match_score|floatformat:2 }} Match
+                                    </span>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <i data-feather="map-pin" class="h-4 w-4 mr-1"></i>
+                                        {{ job.location }}
+                                        <span class="mx-2">•</span>
+                                        <i data-feather="briefcase" class="h-4 w-4 mr-1"></i>
+                                        {{ job.job_type }}
+                                    </div>
+                                    <div class="mt-2 text-sm text-gray-600">
+                                        <div id="description-{{ job.id }}" class="description-preview">
+                                            {{ job.description|truncatewords:30 }}
+                                        </div>
+                                        <div id="description-full-{{ job.id }}" class="description-full hidden">
+                                            {{ job.description }}
+                                        </div>
+                                        <button onclick="toggleDescription('{{ job.id }}')" class="text-blue-600 hover:text-blue-800 text-sm font-medium mt-1">
+                                            <span id="toggle-text-{{ job.id }}">See More</span>
+                                        </button>
+                                    </div>
+                                    <div class="mt-4 flex flex-wrap gap-2">
+                                        {% for skill in job.required_skills %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            {{ skill }}
+                                        </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex space-x-3">
+                                    <a href="{{ job.apply_link }}" target="_blank" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        Apply Now
+                                    </a>
+                                    <button onclick="showImprovements('{{ job.id }}')" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        Get Improvements
+                                    </button>
+                                </div>
+                                <div id="improvements-{{ job.id }}" class="mt-4 hidden">
+                                    <div class="bg-gray-50 rounded-lg p-4">
+                                        <h4 class="text-sm font-medium text-gray-900 mb-2">Improvement Suggestions</h4>
+                                        <div class="suggestions-list space-y-3">
+                                            <!-- Suggestions will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// CSRF Token Helper
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Feather icons
+    feather.replace();
+
+    // File upload preview
+    const fileInput = document.getElementById('resume');
+    const fileLabel = fileInput.nextElementSibling;
+    const resumeForm = document.getElementById('resumeForm');
+    const fileName = document.getElementById('fileName');
+    const uploadButton = document.getElementById('uploadButton');
+    const buttonText = document.getElementById('buttonText');
+    const uploadSpinner = document.getElementById('uploadSpinner');
+    
+    fileInput.addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+            const file = this.files[0];
+            fileName.textContent = file.name;
+            uploadButton.disabled = false;
+        }
+    });
+
+    // Resume Upload Handler
+    resumeForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Show upload spinner
+        buttonText.textContent = 'Uploading...';
+        uploadSpinner.classList.remove('hidden');
+        uploadButton.disabled = true;
+        
+        const formData = new FormData(this);
+        
+        try {
+            const response = await fetch('/upload-resume/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Reload the page to show the new resume
+                window.location.reload();
+            } else {
+                alert(data.error || 'An error occurred while processing your resume.');
+                // Reset button state
+                buttonText.textContent = 'Upload Resume';
+                uploadSpinner.classList.add('hidden');
+                uploadButton.disabled = false;
+            }
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while uploading your resume. Please try again.');
+            // Reset button state
+            buttonText.textContent = 'Upload Resume';
+            uploadSpinner.classList.add('hidden');
+            uploadButton.disabled = false;
+        }
+    });
+
+    // Improve Resume Button
+    document.getElementById('improveResumeBtn').addEventListener('click', function() {
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const jobResults = document.getElementById('jobResults');
+        
+        // Show loading state
+        loadingSpinner.classList.remove('hidden');
+        jobResults.classList.add('hidden');
+        
+        // Get the first job from the list to analyze against
+        const firstJob = document.querySelector('.card-glow');
+        if (!firstJob) {
+            loadingSpinner.classList.add('hidden');
+            jobResults.classList.remove('hidden');
+            alert('Please fetch jobs first to get resume improvement suggestions.');
+            return;
+        }
+        
+        const jobId = firstJob.querySelector('button[onclick^="showImprovements"]')
+            .getAttribute('onclick')
+            .match(/'([^']+)'/)[1];
+        
+        // Fetch improvements
+        fetch(`/analyze-job-match/${jobId}/`)
+            .then(response => response.json())
+            .then(data => {
+                loadingSpinner.classList.add('hidden');
+                jobResults.classList.remove('hidden');
+                
+                if (data.success && Array.isArray(data.suggestions) && data.suggestions.length > 0) {
+                    // Show improvements in a modal or dedicated section
+                    const improvementsHtml = data.suggestions.map(suggestion => `
+                        <div class="bg-white rounded-lg p-4 shadow-sm mb-4">
+                            <h5 class="text-sm font-medium text-blue-600">${suggestion.category || 'General'}</h5>
+                            <p class="text-xs text-gray-500 mt-1"><strong>Section:</strong> ${suggestion.section || 'General'}</p>
+                            <p class="text-xs text-gray-600 mt-1"><strong>Current:</strong> ${suggestion.current_content || 'Not specified'}</p>
+                            <p class="text-xs text-green-600 mt-1"><strong>Implementation:</strong> ${suggestion.direct_implementation || 'Not specified'}</p>
+                            <p class="text-xs text-gray-600 mt-1"><strong>Impact:</strong> ${suggestion.reason_impact || 'Not specified'}</p>
+                        </div>
+                    `).join('');
+                    
+                    // Create and show modal
+                    const modal = document.createElement('div');
+                    modal.className = 'fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4';
+                    modal.innerHTML = `
+                        <div class="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                            <div class="p-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-lg font-medium text-gray-900">Resume Improvement Suggestions</h3>
+                                    <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-500">
+                                        <i data-feather="x" class="h-6 w-6"></i>
+                                    </button>
+                                </div>
+                                <div class="space-y-4">
+                                    ${improvementsHtml}
+                                </div>
+                                <div class="mt-6 flex justify-end">
+                                    <button onclick="this.closest('.fixed').remove()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                    feather.replace();
+                } else {
+                    alert('No improvement suggestions available at this time. Please try again later.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                loadingSpinner.classList.add('hidden');
+                jobResults.classList.remove('hidden');
+                alert('An error occurred while fetching suggestions. Please try again.');
+            });
+    });
+});
+
+function showImprovements(jobId) {
+    const improvementsDiv = document.getElementById(`improvements-${jobId}`);
+    const suggestionsList = improvementsDiv.querySelector('.suggestions-list');
+    
+    if (improvementsDiv.classList.contains('hidden')) {
+        improvementsDiv.classList.remove('hidden');
+        suggestionsList.innerHTML = '<div class="animate-pulse space-y-3"><div class="h-4 bg-gray-200 rounded w-3/4"></div><div class="h-4 bg-gray-200 rounded"></div><div class="h-4 bg-gray-200 rounded w-5/6"></div></div>';
+        
+        // Fetch improvements
+        fetch(`/analyze-job-match/${jobId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && Array.isArray(data.suggestions) && data.suggestions.length > 0) {
+                    suggestionsList.innerHTML = data.suggestions.map(suggestion => `
+                        <div class="bg-white rounded-lg p-3 shadow-sm">
+                            <h5 class="text-sm font-medium text-blue-600">${suggestion.category || 'General'}</h5>
+                            <p class="text-xs text-gray-500 mt-1"><strong>Section:</strong> ${suggestion.section || 'General'}</p>
+                            <p class="text-xs text-gray-600 mt-1"><strong>Current:</strong> ${suggestion.current_content || 'Not specified'}</p>
+                            <p class="text-xs text-green-600 mt-1"><strong>Implementation:</strong> ${suggestion.direct_implementation || 'Not specified'}</p>
+                            <p class="text-xs text-gray-600 mt-1"><strong>Impact:</strong> ${suggestion.reason_impact || 'Not specified'}</p>
+                        </div>
+                    `).join('');
+                } else {
+                    suggestionsList.innerHTML = `
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i data-feather="alert-triangle" class="h-5 w-5 text-yellow-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-yellow-700">
+                                        No specific suggestions available at this time. Please try again later.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                feather.replace();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                suggestionsList.innerHTML = `
+                    <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i data-feather="alert-circle" class="h-5 w-5 text-red-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-red-700">
+                                    An error occurred while fetching suggestions. Please try again.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                feather.replace();
+            });
+    } else {
+        improvementsDiv.classList.add('hidden');
+    }
+}
+
+// Add this new function for toggling job descriptions
+function toggleDescription(jobId) {
+    const preview = document.getElementById(`description-${jobId}`);
+    const full = document.getElementById(`description-full-${jobId}`);
+    const toggleText = document.getElementById(`toggle-text-${jobId}`);
+    
+    if (preview.classList.contains('hidden')) {
+        preview.classList.remove('hidden');
+        full.classList.add('hidden');
+        toggleText.textContent = 'See More';
+    } else {
+        preview.classList.add('hidden');
+        full.classList.remove('hidden');
+        toggleText.textContent = 'See Less';
+    }
+}
+</script>
+{% endblock %} 
