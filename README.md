@@ -1,4 +1,4 @@
-# LinkedIn Job Recommender 🎯
+# Job Recommender 🎯
 
 A smart job recommendation system that helps match your resume with relevant job opportunities using AI-powered analysis.
 
@@ -34,7 +34,7 @@ A smart job recommendation system that helps match your resume with relevant job
 ## 📁 Project Structure
 
 ```
-linkedin-job-recommender/
+job-recommender/
 ├── app/
 │   ├── api/          # API routes and endpoints
 │   ├── config/       # Configuration settings
